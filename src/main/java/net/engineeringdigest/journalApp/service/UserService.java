@@ -33,6 +33,15 @@ public class UserService {
         return userRepository.findByUsername(username);
     }
 
+    public boolean isJournalPresent(String username, ObjectId id) {
+        for(ObjectId journalId : userRepository.findByUsername(username).getJournalEntries()) {
+            if(journalId.equals(id)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public void saveUser(User user) {
         user.setPassword(new BCryptPasswordEncoder().encode(user.getPassword()));
         user.setRoles(Arrays.asList("USER"));
@@ -46,7 +55,7 @@ public class UserService {
     public boolean updateEntry(JournalEntry oldJournal, JournalEntry newEntry, String username) {
         User user = getUserByUsername(username);
         for (ObjectId journalId : user.getJournalEntries()) {
-            if (journalId == oldJournal.getId()) {
+            if (journalId.equals(oldJournal.getId())) {
 //                this journal belongs to this user only.
                 oldJournal.setTitle(
                         newEntry.getTitle() == null || newEntry.getTitle().isEmpty() ?
