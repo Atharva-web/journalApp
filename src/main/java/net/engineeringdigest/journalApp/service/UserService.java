@@ -6,6 +6,7 @@ import net.engineeringdigest.journalApp.repository.UserRepository;
 
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.aggregation.ArrayOperators;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -93,5 +94,18 @@ public class UserService {
             journalEntriesList.add(journalService.getEntryById(id).get());
         }
         return journalEntriesList;
+    }
+
+    public void deleteEntry(String username, ObjectId id) throws Exception {
+        try {
+            User user = getUserByUsername(username);
+            List<ObjectId> updatedList = user.getJournalEntries();
+            updatedList.remove(id);
+            user.setJournalEntries(updatedList);
+            userRepository.save(user);
+        }
+        catch(Exception e) {
+            throw new Exception(e.getMessage());
+        }
     }
 }
