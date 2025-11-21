@@ -38,7 +38,9 @@ public class JournalController {
 
     @GetMapping("/id/{id}")
     public ResponseEntity<JournalEntry> getEntryById(@PathVariable ObjectId id) {
-        if (journalService.getEntryById(id).isPresent()) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (userService.isJournalPresent(authentication.getName(), id)) {
+            System.out.println(journalService.getEntryById(id).get());
             return new ResponseEntity<>(journalService.getEntryById(id).get(), HttpStatus.OK);
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -75,6 +77,7 @@ public class JournalController {
         Optional<JournalEntry> oldJournalEntry = journalService.getEntryById(oldJournalId);
         if (oldJournalEntry.isPresent()) {
             userService.updateEntry(oldJournalEntry.get(), newEntry, authentication.getName());
+            return new ResponseEntity<>(HttpStatus.OK);
         }
         return new ResponseEntity<>("journal id not found", HttpStatus.NOT_FOUND);
     }
